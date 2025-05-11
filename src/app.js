@@ -29,16 +29,28 @@ app.get("/user", async (req, res) => {
 
   try {
     const user = await User.find({ email: email });
-
+    if(!user?.length) return res.status(404).send("User Not Found")
     res.send(user);
   } catch (err) {
     res.status(500).send("Something went worng");
   }
 });
 
-// app.get("/feed",(req,res) = {
+app.get("/feeds", async (req,res)=>{
 
-// })
+  try {
+    const users = await User.find({})
+
+    res.send(users)
+    
+  }
+  catch {
+    res.status(500).send("SWR")
+  }
+
+})
+
+
 
 // Should be after Error thrown!!
 
