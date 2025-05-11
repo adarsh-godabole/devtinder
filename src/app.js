@@ -5,35 +5,40 @@ const User = require("./models/user");
 
 const app = express();
 
-
-app.use(express.json()  )
-
-
+app.use(express.json());
 
 app.post("/signUp", async (req, res) => {
+  console.log(req?.body);
 
+  const userObj = req.body;
 
-  console.log(req?.body)
-
-  const userObj = req.body
-
-  const user = new User(userObj); 
-
+  const user = new User(userObj);
 
   try {
     await user.save();
-  }
-  catch (err) {
+  } catch (err) {
     console.log("ERROR", err);
     res.status(500).send("UNAVAILABLE");
   }
   console.log("SAVED");
   res.send("User Created");
-
 });
 
+app.get("/user", async (req, res) => {
+  const email = req?.body?.email;
 
+  try {
+    const user = await User.find({ email: email });
 
+    res.send(user);
+  } catch (err) {
+    res.status(500).send("Something went worng");
+  }
+});
+
+// app.get("/feed",(req,res) = {
+
+// })
 
 // Should be after Error thrown!!
 
@@ -52,39 +57,6 @@ connectDB()
   .catch((err) => {
     console.log("ERROR");
   });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ROUTE HANDLERS ////
 
@@ -150,6 +122,3 @@ connectDB()
 // app.get("/user/profile",(req,res)=>{
 //   res.send("REGISTERED")
 // })
-
-
-
