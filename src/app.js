@@ -6,16 +6,16 @@ const User = require("./models/user");
 const app = express();
 
 
+app.use(express.json()  )
+
+
 
 app.post("/signUp", async (req, res) => {
 
-  const userObj = {
-    firstName: "Adarsh",
-    lastName: "Godbole",
-    email: "adarsh@gmail.com",
-    password: "adarsh",
-    age: 22,
-  };
+
+  console.log(req?.body)
+
+  const userObj = req.body
 
   const user = new User(userObj); 
 
