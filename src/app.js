@@ -1,6 +1,90 @@
 const express = require("express");
 
+const connectDB = require("./config/database");
+const User = require("./models/user");
+
 const app = express();
+
+
+
+app.post("/signUp", async (req, res) => {
+
+  const userObj = {
+    firstName: "Adarsh",
+    lastName: "Godbole",
+    email: "adarsh@gmail.com",
+    password: "adarsh",
+    age: 22,
+  };
+
+  const user = new User(userObj); 
+
+
+  try {
+    await user.save();
+  }
+  catch (err) {
+    console.log("ERROR", err);
+    res.status(500).send("UNAVAILABLE");
+  }
+  console.log("SAVED");
+  res.send("User Created");
+
+});
+
+
+
+
+// Should be after Error thrown!!
+
+app.use("/", (err, req, res, next) => {
+  if (err) {
+    res.status(500).send("UNAVAILABLE");
+  }
+});
+connectDB()
+  .then(() => {
+    console.log("CONNECTED");
+    app.listen(3000, () => {
+      console.log("RUNNING");
+    });
+  })
+  .catch((err) => {
+    console.log("ERROR");
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ROUTE HANDLERS ////
 
@@ -16,7 +100,7 @@ const app = express();
 // });
 
 // app.post("/deleted", (req, res) => {
-//   res.send("Deleted");  
+//   res.send("Deleted");
 // });
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,35 +127,29 @@ const app = express();
 //   }
 // );
 
+// import { adminAuth } from "./middlewares/auth";
+// import { userAuth } from "./middlewares/userauth";
 
-import { adminAuth } from "./middlewares/auth";
-import { userAuth } from "./middlewares/userauth";
+// // Middleware
 
+// app.get("/admin",adminAuth)
 
-// Middleware
+// app.get("/admin/getAllData",(req,res)=>{
+//   // AUthenticate
+//   res.send("All Data")
+// })
 
-app.get("/admin",adminAuth)
+// app.get("/admin/seleteAllData",(req,res)=>{
+//   res.send("All Data Deleted")
+// })
 
+// app.get("/user/register", userAuth ,(req,res)=>{
+//   res.send("REGISTERED")
+// })
 
-
-app.get("/admin/getAllData",(req,res)=>{
-  // AUthenticate
-  res.send("All Data")
-})
-
-app.get("/admin/seleteAllData",(req,res)=>{
-  res.send("All Data Deleted")
-})
-
-app.get("/user/register", userAuth ,(req,res)=>{
-  res.send("REGISTERED")
-})
-
-app.get("/user/profile",(req,res)=>{
-  res.send("REGISTERED")
-})
+// app.get("/user/profile",(req,res)=>{
+//   res.send("REGISTERED")
+// })
 
 
-app.listen(3000, () => {
-  console.log("RUNNING");
-});
+
