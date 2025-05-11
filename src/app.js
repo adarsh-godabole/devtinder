@@ -29,28 +29,51 @@ app.get("/user", async (req, res) => {
 
   try {
     const user = await User.find({ email: email });
-    if(!user?.length) return res.status(404).send("User Not Found")
+    if (!user?.length) return res.status(404).send("User Not Found");
     res.send(user);
   } catch (err) {
     res.status(500).send("Something went worng");
   }
 });
 
-app.get("/feeds", async (req,res)=>{
-
+app.delete("/delete", async (req, res) => {
   try {
-    const users = await User.find({})
+    const userId = req.body.userId;
 
-    res.send(users)
-    
+    const user = await User.findByIdAndDelete({ _id: userId });
+
+    console.log("USER----->", user);
+
+    if (!user) return res.status(404).send("User not found");
+
+    res.send(`${user.firstName} deleted!`);
+  } catch (err) {
+    res.status(500).send("Something went worng");
   }
-  catch {
-    res.status(500).send("SWR")
+});
+
+app.get("/feeds", async (req, res) => {
+  try {
+    const users = await User.find({});
+
+    res.send(users);
+  } catch {
+    res.status(500).send("SWR");
   }
+});
 
-})
+app.patch("/updateUser", async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const newObj = req.body;
 
+    const user = await User.findByIdAndUpdate(userId, newObj);
 
+    res.send("Updated successfully");
+  } catch {
+    res.status(500).send("SWR");
+  }
+});
 
 // Should be after Error thrown!!
 
