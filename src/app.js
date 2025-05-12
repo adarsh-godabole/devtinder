@@ -18,7 +18,7 @@ app.post("/signUp", async (req, res) => {
     await user.save();
   } catch (err) {
     console.log("ERROR", err);
-    res.status(500).send("UNAVAILABLE");
+    res.status(500).send("ERROR CREATING USER"+ err);
   }
   console.log("SAVED");
   res.send("User Created");
@@ -57,8 +57,8 @@ app.get("/feeds", async (req, res) => {
     const users = await User.find({});
 
     res.send(users);
-  } catch {
-    res.status(500).send("SWR");
+  } catch(err) {
+    res.status(500).send("SWR" + err);
   }
 });
 
@@ -67,7 +67,9 @@ app.patch("/updateUser", async (req, res) => {
     const userId = req.body.userId;
     const newObj = req.body;
 
-    const user = await User.findByIdAndUpdate(userId, newObj);
+    const user = await User.findByIdAndUpdate(userId, newObj , {
+      runValidators : true
+    });
 
     res.send("Updated successfully");
   } catch {
