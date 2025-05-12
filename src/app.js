@@ -10,6 +10,10 @@ app.use(express.json());
 app.post("/signUp", async (req, res) => {
   console.log(req?.body);
 
+  if(req?.body?.skills.length>5){
+    return res.send("MAX 5 skills")
+  }
+
   const userObj = req.body;
 
   const user = new User(userObj);
@@ -18,7 +22,7 @@ app.post("/signUp", async (req, res) => {
     await user.save();
   } catch (err) {
     console.log("ERROR", err);
-    res.status(500).send("ERROR CREATING USER"+ err);
+    res.status(500).send("ERROR CREATING USER" + err);
   }
   console.log("SAVED");
   res.send("User Created");
@@ -57,18 +61,32 @@ app.get("/feeds", async (req, res) => {
     const users = await User.find({});
 
     res.send(users);
-  } catch(err) {
+  } catch (err) {
     res.status(500).send("SWR" + err);
   }
 });
 
-app.patch("/updateUser", async (req, res) => {
+app.patch("/updateUser/:userId", async (req, res) => {
   try {
-    const userId = req.body.userId;
+    const userId = req?.params?.userId;
     const newObj = req.body;
+     if(req?.body?.skills.length>5){
+    return res.send("MAX 5 skills")
+  }
+    const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "skills"];
 
-    const user = await User.findByIdAndUpdate(userId, newObj , {
-      runValidators : true
+    const isUpdateOllowed = Object.keys(newObj).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+
+    if (!isUpdateOllowed) {
+      console.log("HERE----");
+
+      res.status(500).send("Update now allowed");
+    }
+
+    const user = await User.findByIdAndUpdate(userId, newObj, {
+      runValidators: true,
     });
 
     res.send("Updated successfully");
