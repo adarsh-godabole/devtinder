@@ -41,6 +41,37 @@ app.post("/signUp", async (req, res) => {
   res.send("User Created");
 });
 
+
+
+app.post("/login", async (req,res) => {
+
+  try {
+    const {email,password} = req.body;
+     const user = await User.findOne({email:email})
+
+     if(!user)
+     {
+      res.status(404).send("User not found")
+     }
+    const ispasswordValid = await bcrypt.compare(password,user?.password)
+
+    if(ispasswordValid) {
+      res.send("Login successful")
+    }
+    else{
+      res.status(500).send("Inavlid passowrd")
+    }
+
+  }catch (err) {
+    console.log("ERROR", err);
+    res.status(500).send(err);
+  }
+})
+
+
+
+
+
 app.get("/user", async (req, res) => {
   const email = req?.body?.email;
 
