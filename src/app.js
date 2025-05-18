@@ -1,6 +1,8 @@
 const express = require("express");
 
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+
 
 const connectDB = require("./config/database");
 const User = require("./models/user");
@@ -9,6 +11,8 @@ const { validateSIgnup } = require("./utils/validation");
 const app = express();
 
 app.use(express.json());
+
+app.use(cookieParser())
 
 app.post("/signUp", async (req, res) => {
   console.log(req?.body?.password);
@@ -56,6 +60,18 @@ app.post("/login", async (req,res) => {
     const ispasswordValid = await bcrypt.compare(password,user?.password)
 
     if(ispasswordValid) {
+
+      // create a JWT
+
+
+
+      // Add JWT to cookie
+
+
+
+      res.cookie("token","sahdohsdohasudmnasbdjbie")
+
+
       res.send("Login successful")
     }
     else{
@@ -71,6 +87,20 @@ app.post("/login", async (req,res) => {
 
 
 
+
+
+
+app.get("/profile", async (req, res) => {
+
+  try{
+    const cookies = req?.cookies
+    console.log("COOKIES---->",cookies)
+    res.send("READING COOKIES")
+  }catch(err)
+  {
+    res.status(500).send(err)
+  }
+})
 
 app.get("/user", async (req, res) => {
   const email = req?.body?.email;
