@@ -1,24 +1,37 @@
 const express = require("express");
 
+const bcrypt = require("bcrypt");
+
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const { validateSIgnup } = require("./utils/validation");
 
 const app = express();
 
 app.use(express.json());
 
 app.post("/signUp", async (req, res) => {
-  console.log(req?.body);
-
-  if(req?.body?.skills.length>5){
-    return res.send("MAX 5 skills")
-  }
-
-  const userObj = req.body;
-
-  const user = new User(userObj);
+  console.log(req?.body?.password);
 
   try {
+    validateSIgnup(req?.body);
+    const {password } = req?.body
+
+    const passwordHash = await bcrypt.hash(password,10)
+
+    console.log("HASH------------>",passwordHash)
+
+
+    if (req?.body?.skills.length > 5) {
+      return res.send("MAX 5 skills");
+    }
+
+    const userObj = req.body;
+
+    userObj.password = passwordHash
+
+    const user = new User(userObj);
+
     await user.save();
   } catch (err) {
     console.log("ERROR", err);
@@ -70,9 +83,9 @@ app.patch("/updateUser/:userId", async (req, res) => {
   try {
     const userId = req?.params?.userId;
     const newObj = req.body;
-     if(req?.body?.skills.length>5){
-    return res.send("MAX 5 skills")
-  }
+    if (req?.body?.skills.length > 5) {
+      return res.send("MAX 5 skills");
+    }
     const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "skills"];
 
     const isUpdateOllowed = Object.keys(newObj).every((k) =>
