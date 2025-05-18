@@ -3,28 +3,29 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 
-
 const connectDB = require("./config/database");
+const jwt = require("jsonwebtoken");
+
 const User = require("./models/user");
 const { validateSIgnup } = require("./utils/validation");
+const { userAuth } = require("./middlewares/userauth");
 
 const app = express();
 
 app.use(express.json());
 
-app.use(cookieParser())
+app.use(cookieParser());
 
 app.post("/signUp", async (req, res) => {
   console.log(req?.body?.password);
 
   try {
     validateSIgnup(req?.body);
-    const {password } = req?.body
+    const { password } = req?.body;
 
-    const passwordHash = await bcrypt.hash(password,10)
+    const passwordHash = await bcrypt.hash(password, 10);
 
-    console.log("HASH------------>",passwordHash)
-
+    console.log("HASH------------>", passwordHash);
 
     if (req?.body?.skills.length > 5) {
       return res.send("MAX 5 skills");
@@ -32,7 +33,7 @@ app.post("/signUp", async (req, res) => {
 
     const userObj = req.body;
 
-    userObj.password = passwordHash
+    userObj.password = passwordHash;
 
     const user = new User(userObj);
 
@@ -45,62 +46,47 @@ app.post("/signUp", async (req, res) => {
   res.send("User Created");
 });
 
-
-
-app.post("/login", async (req,res) => {
-
+app.post("/login", async (req, res) => {
   try {
-    const {email,password} = req.body;
-     const user = await User.findOne({email:email})
+    const { email, password } = req.body;
+    const user = await User.findOne({ email: email });
 
-     if(!user)
-     {
-      res.status(404).send("User not found")
-     }
-    const ispasswordValid = await bcrypt.compare(password,user?.password)
+    if (!user) {
+      res.status(404).send("User not found");
+    }
+    const ispasswordValid = await bcrypt.compare(password, user?.password);
 
-    if(ispasswordValid) {
-
+    if (ispasswordValid) {
       // create a JWT
 
+      const token = await jwt.sign({ _id: user._id }, "Magnifico@17011998");
 
+      console.log("TOKEN------->", token);
 
       // Add JWT to cookie
 
+      res.cookie("token", token);
 
-
-      res.cookie("token","sahdohsdohasudmnasbdjbie")
-
-
-      res.send("Login successful")
+      res.send("Login successful");
+    } else {
+      res.status(500).send("Inavlid passowrd");
     }
-    else{
-      res.status(500).send("Inavlid passowrd")
-    }
-
-  }catch (err) {
+  } catch (err) {
     console.log("ERROR", err);
     res.status(500).send(err);
   }
-})
+});
 
+app.get("/profile", userAuth, async (req, res) => {
 
-
-
-
-
-
-app.get("/profile", async (req, res) => {
-
-  try{
-    const cookies = req?.cookies
-    console.log("COOKIES---->",cookies)
-    res.send("READING COOKIES")
-  }catch(err)
-  {
-    res.status(500).send(err)
+  console.log("CHeckpoint 2")
+  try {
+    console.log("Logged in user is", req.user);
+    res.send(req.user);
+  } catch (err) {
+    res.status(500).send(err);
   }
-})
+});
 
 app.get("/user", async (req, res) => {
   const email = req?.body?.email;
@@ -114,7 +100,7 @@ app.get("/user", async (req, res) => {
   }
 });
 
-app.delete("/delete", async (req, res) => {
+app.delete("/delete",userAuth, async (req, res) => {
   try {
     const userId = req.body.userId;
 
